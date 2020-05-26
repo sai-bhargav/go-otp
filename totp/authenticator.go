@@ -16,7 +16,6 @@ func AuthenticatorTotp(accessToken string) int32 {
 
 	if err != nil{
 		panic("Cannot decode the access token")
-
 	}
 
 	h := hmac.New(sha1.New, d)
