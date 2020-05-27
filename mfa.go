@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	generateOtp.Otp()
+	authenticator.Run()
 }

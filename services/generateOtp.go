@@ -1,52 +1,42 @@
-package generateOtp
+package authenticator
 
 import (
-	"github.com/sai-bhargav/mfa-cli/config"
-	"flag"
 	"io/ioutil"
+	"fmt"
+	"os"
 	"encoding/json"
+	"github.com/sai-bhargav/mfa-cli/totp"
 )
 
-func Otp() {
-
-	var app string
-	var secret string
+func generateOtp(app string) {
 	
-	flag.StringVar(&app, "app", "", "help message for flagname")
-	flag.StringVar(&secret, "secret", "", "help message for flagname")
+	token := fetchAppToken(app)
+	otp := authenticator.AuthenticatorTotp(token)
 
-	set_config := flag.Bool("config", false , "set path to your secrets.json file")
-	flag.Parse()
+	fmt.Println("Generated OTP")
+	fmt.Println(otp)
 
-	if *set_config {
+}
 
-		tes := make(map[string]string) 
+func fetchAppToken(appName string) (string) {
 
-		jsonFile, errz := ioutil.ReadFile("config/secrets.json")
-		if errz != nil {
-				panic(errz)
-		}
-
-		errz = json.Unmarshal(jsonFile, &tes)
-		if errz != nil {
-			panic(errz)
-		}
-
-		tes[app] = secret
-
-		empData, errp := json.Marshal(tes)   
-    if errp != nil {
-        panic(errp)
-        return
-    }
-
-		d1 := []byte(string(empData))
-
-		err := ioutil.WriteFile("config/secrets.json", d1, 0644)
-    if err != nil {
-        panic(err)
-		}
+	jsonFile, err := ioutil.ReadFile("config/secrets.json")
+	if err != nil {
+			panic(err)
 	}
 
-	config.Config(app, "config/secrets.json")
+	var apps map[string]string
+
+	err = json.Unmarshal(jsonFile, &apps)
+	if err != nil {
+		panic(err)
+	}
+
+	if apps[appName] == "" {
+		err := "App " + appName + " is not configured.\nPlease ensure to configure the app before generating otp."
+		fmt.Println(err)
+		os.Exit(0)
+	}
+
+	return apps[appName]
 }
