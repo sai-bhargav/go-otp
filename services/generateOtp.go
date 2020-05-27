@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"encoding/json"
-	"github.com/sai-bhargav/mfa-cli/totp"
+	"github.com/sai-bhargav/go-otp/totp"
 )
 
 func generateOtp(app string) {
