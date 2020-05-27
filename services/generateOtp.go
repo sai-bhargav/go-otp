@@ -1,50 +1,52 @@
 package generateOtp
 
 import (
-	"fmt"
 	"github.com/sai-bhargav/mfa-cli/config"
 	"flag"
 	"io/ioutil"
-	"os"
-	"strings"
+	"encoding/json"
 )
 
 func Otp() {
 
 	var app string
-	var path string
+	var secret string
 	
 	flag.StringVar(&app, "app", "", "help message for flagname")
-	flag.StringVar(&path, "path", "", "help message for flagname")
+	flag.StringVar(&secret, "secret", "", "help message for flagname")
 
 	set_config := flag.Bool("config", false , "set path to your secrets.json file")
 	flag.Parse()
 
 	if *set_config {
 
-		d1 := []byte(path)
+		tes := make(map[string]string) 
 
-		err := ioutil.WriteFile("config/secrets", d1, 0644)
+		jsonFile, errz := ioutil.ReadFile("config/secrets.json")
+		if errz != nil {
+				panic(errz)
+		}
+
+		errz = json.Unmarshal(jsonFile, &tes)
+		if errz != nil {
+			panic(errz)
+		}
+
+		tes[app] = secret
+
+		empData, errp := json.Marshal(tes)   
+    if errp != nil {
+        panic(errp)
+        return
+    }
+
+		d1 := []byte(string(empData))
+
+		err := ioutil.WriteFile("config/secrets.json", d1, 0644)
     if err != nil {
         panic(err)
 		}
 	}
 
-	fileIO, err := os.OpenFile("config/secrets", os.O_RDWR, 0600)
-
-		if err != nil {
-			panic(err)
-		}
-		defer fileIO.Close()
-
-		rawBytes, err := ioutil.ReadAll(fileIO)
-		if err != nil {
-			panic(err)
-		}
-
-		lines := strings.Split(string(rawBytes), "\n")
-		file_req := lines[0]
-		fmt.Print("\n")
-
-	config.Config(app, file_req)
+	config.Config(app, "config/secrets.json")
 }

@@ -7,15 +7,6 @@ import (
 	"github.com/sai-bhargav/mfa-cli/totp"
 )
 
-type Apps struct {
-	Apps []Credentials
-}
-
-type Credentials struct {
-	App_name   string
-	Secret_key   string
-}
-
 func Config(appName string, filePath string){
 
 	jsonFile, err := ioutil.ReadFile(filePath)
@@ -23,19 +14,15 @@ func Config(appName string, filePath string){
 			panic(err)
 	}
 
-	var apps Apps
+	var apps map[string]string
 
 	err = json.Unmarshal(jsonFile, &apps)
 	if err != nil {
-		fmt.Println("error:", err)
+		panic(err)
 	}
 
-	for i := 0; i<len(apps.Apps); i++{
-		if apps.Apps[i].App_name == appName {
-			ans := authenticator.AuthenticatorTotp(apps.Apps[i].Secret_key)
+	otp := authenticator.AuthenticatorTotp(apps[appName])
 
-			fmt.Print("Generated OTP \n")
-			fmt.Print(ans)
-		}
-	}
+	fmt.Println("Generated OTP")
+	fmt.Println(otp)
 }
